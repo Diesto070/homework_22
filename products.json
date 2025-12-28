@@ -1,0 +1,67 @@
+[
+{
+    "model": "catalog.product",
+    "pk": 2,
+    "fields": {
+        "name": "Картофель",
+        "description": "Беларусский картофель в сетке",
+        "picture": "",
+        "category": 1,
+        "purchase_price": "0.00",
+        "created_at": "2025-10-18T16:42:00.820Z",
+        "updated_at": "2025-10-19T20:06:54.570Z"
+    }
+},
+{
+    "model": "catalog.product",
+    "pk": 3,
+    "fields": {
+        "name": "Яблоки",
+        "description": "Сезонные яблоки",
+        "picture": "",
+        "category": 2,
+        "purchase_price": "0.00",
+        "created_at": "2025-10-18T16:42:37.110Z",
+        "updated_at": "2025-10-18T16:42:37.110Z"
+    }
+},
+{
+    "model": "catalog.product",
+    "pk": 4,
+    "fields": {
+        "name": "Виноград",
+        "description": "Виноград Дамские пальчики",
+        "picture": "",
+        "category": 2,
+        "purchase_price": "0.00",
+        "created_at": "2025-10-18T16:43:36.721Z",
+        "updated_at": "2025-10-18T16:43:36.721Z"
+    }
+},
+{
+    "model": "catalog.product",
+    "pk": 5,
+    "fields": {
+        "name": "Молоко",
+        "description": "Домик в деревне, 2.5%",
+        "picture": "",
+        "category": 3,
+        "purchase_price": "0.00",
+        "created_at": "2025-10-18T16:44:17.674Z",
+        "updated_at": "2025-10-18T16:44:17.674Z"
+    }
+},
+{
+    "model": "catalog.product",
+    "pk": 6,
+    "fields": {
+        "name": "Российский сыр",
+        "description": "Моя семья",
+        "picture": "",
+        "category": 3,
+        "purchase_price": "0.00",
+        "created_at": "2025-10-18T16:44:58.845Z",
+        "updated_at": "2025-10-18T16:44:58.845Z"
+    }
+}
+]
