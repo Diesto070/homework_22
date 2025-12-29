@@ -1,0 +1,14 @@
+{% extends 'catalog/base.html' %}
+{% block title %}Форма для продуктов{% endblock %}
+{% block content %}
+{% include 'catalog/header.html' %}
+<div class="container">
+    <h2>Форма для продуктов</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+        <a href="{% url 'catalog:product_list' %}" class="btn btn-primary">Отменить</a>
+    </form>
+</div>
+{% endblock %}
