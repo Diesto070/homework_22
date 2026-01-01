@@ -1,4 +1,3 @@
-from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import CharField
 
@@ -41,7 +40,7 @@ class Product(models.Model):
         help_text="Введите описание продукта",
     )
     picture = models.ImageField(
-        upload_to="catalog/photo",
+        upload_to="catalog/photo/",
         blank=True,
         null=True,
         verbose_name="Фото",
@@ -60,7 +59,7 @@ class Product(models.Model):
         max_digits=10,
         decimal_places=2,
         default=0.00,
-        validators=[MinValueValidator(0)],  # Цена не может быть отрицательной
+        # validators=[MinValueValidator(0)],  # Цена не может быть отрицательной
         verbose_name='Цена продукта',
         help_text='Стоимость продукта',
     )       # цена за покупку
