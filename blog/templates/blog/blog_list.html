@@ -1,0 +1,39 @@
+{% extends 'catalog/base.html' %}
+{% load my_tags %}
+{% block content %}
+
+<div class="container">
+    <img src="/media/blog/photo/меню недели.webp" alt="Меню недели">
+    <div class="content">
+    <h1>Меню на неделю: Вкусно, полезно и без стресса.</h1>
+    Привет, дорогие читатели! Сколько раз вы стояли перед открытым холодильником в раздумьях: «Что бы такого приготовить?».
+    Знакомая ситуация, не правда ли? Планирование меню на неделю — это настоящая магия, которая спасает время, деньги и нервы. Сегодня я делюсь с вами своим вариантом сбалансированного и вкусного меню на всю неделю. Каждый рецепт будет сопровождаться фото для вдохновения! Готовы упростить свою жизнь? Поехали!
+    </div>
+</div>
+
+<div class="album py-3 bg-body-tertiary">
+    <div class="container">
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+            {% for blog in object_list %}
+            <div class="col">
+                <div class="card shadow-sm">
+                    <img src="{{ blog.picture | media_filter }}">
+                    <div class="card-body">
+                        <p class="card-text">{{ blog.heading }}</p>
+                        <p class="card-text">{{ blog.content|truncatechars:50 }}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="btn-group">
+                                <a class="btn btn-primary" href="{% url 'blog:blog_detail' blog.pk %}" role="button">Посмотреть</a>
+                                <a class="btn btn-primary" href="{% url 'blog:blog_update' blog.pk %}" role="button">Редактировать</a>
+                                <a class="btn btn-primary" href="{% url 'blog:blog_delete' blog.pk %}" role="button">Удалить</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}

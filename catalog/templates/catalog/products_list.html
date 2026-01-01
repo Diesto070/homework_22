@@ -1,0 +1,17 @@
+{% extends 'catalog/base.html' %}
+
+{% block title %}Список продуктов{% endblock %}
+{% block content %}
+{% include 'catalog/header.html' %}
+<div class="container">
+    <h2>Список продуктов</h2>
+    <ul class="list-group">
+        {% for product in products %}
+            <li class="list-group-item">
+                <a href="{% url 'catalog:product_detail' product.pk %}">"{{ product.name }}"</a>
+                - {{ product.category }} - {{ product.purchase_price }} руб. {{ product.created_at|date:"d M Y" }}
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

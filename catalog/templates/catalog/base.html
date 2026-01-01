@@ -29,17 +29,18 @@ Dark
 Auto
 <svg class="bi ms-auto d-none" aria-hidden="true"><use href="#check2"></use></svg> </button> </li> </ul> </div>
 <header data-bs-theme="dark">
-{% include 'includes/inc_menu.html' %}
+{% include 'catalog/includes/inc_menu.html' %}
 </header>
 <main>
-    <section class="py-5 text-center container">
+    <section class="py-3 text-center container">
         <div class="row py-lg-5">
             <div class="col-lg-6 col-md-8 mx-auto">
                 <h1 class="fw-light">Онлайн магазин</h1>
                 <p class="lead text-body-secondary">"Покупки"</p>
                 <p>
-                    <a href="#" class="btn btn-primary my-2">Main call to action</a>
-                    <a href="#" class="btn btn-secondary my-2">Secondary action</a>
+                    <a href="{% url 'blog:blog_list' %}" class="btn btn-primary my-2">Перейти к блогу</a>
+                    <a href="{% url 'blog:blog_form' %}" class="btn btn-secondary my-2">Создать статью для блога</a>
+                    <a href="{% url 'catalog:product_list' %}" class="btn btn-secondary my-2">Перейти на страницу магазина</a>
                 </p>
             </div>
         </div>
@@ -56,7 +57,7 @@ Auto
         <p class="mb-1"> &copy; "Покупки"</p>
         <p class="float-center">
             <ul class="list-unstyled d-flex justify-content-center gap-4">
-                <li><a href="{% url 'catalog:products_list' %}" class="text">Главная</a></li>
+                <li><a href="{% url 'catalog:product_list' %}" class="text">Главная</a></li>
                 <li><a href="#" class="text">Вход</a></li>
                 <li><a href="{% url 'catalog:contacts' %}" class="text">Контакты</a></li>
             </ul>
