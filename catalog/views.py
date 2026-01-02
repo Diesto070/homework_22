@@ -3,38 +3,16 @@ from typing import Any
 from django import forms
 from django.http import HttpResponse
 from django.urls import reverse_lazy
-from django.views.generic import DetailView, FormView, ListView, TemplateView, CreateView
+from django.views.generic import CreateView, DeleteView, DetailView, FormView, ListView, TemplateView, UpdateView
 
-from catalog.forms import ContactForm
+from catalog.forms import ProductForm
+from catalog.forms_contact import ContactForm
 from catalog.models import Product
 
 
 class HomeView(TemplateView):
     """Отображает главную страницу """
     template_name = 'catalog/home.html'
-
-
-class ProductListView(ListView):
-    """  Отображает главную страницу с данными по всем продуктам """
-    model = Product
-
-    def get_queryset(self):
-        """Выводим последние созданные 5 продуктов в консоль"""
-        products = Product.objects.order_by('-created_at')[:5]
-
-        print("=== ПОСЛЕДНИЕ 5 ПРОДУКТОВ ===")
-        for product in products:
-            print(f"{product.id} - {product.name} ({product.created_at.strftime('%d.%m.%Y %H:%M')})")
-        return Product.objects.all()
-
-
-class ProductsListView(ListView):
-    """Отображает все продукты в виде списка из базы данных
-    в порядке убывания даты создания"""
-    model = Product
-    template_name = 'catalog/products_list.html'
-    context_object_name = 'products'
-    ordering = ['-created_at']
 
 
 class ContactsView(FormView):
@@ -54,6 +32,29 @@ class ContactsView(FormView):
         return HttpResponse(response_content)
 
 
+class ProductListView(ListView):
+    """  Отображает главную страницу с данными по всем продуктам """
+    model = Product
+
+    def get_queryset(self) -> Any:
+        """Выводим последние созданные 5 продуктов в консоль"""
+        products = Product.objects.order_by('-created_at')[:5]
+
+        print("=== ПОСЛЕДНИЕ 5 ПРОДУКТОВ ===")
+        for product in products:
+            print(f"{product.id} - {product.name} ({product.created_at.strftime('%d.%m.%Y %H:%M')})")
+        return Product.objects.all()
+
+
+class ProductsListView(ListView):
+    """Отображает все продукты в виде списка из базы данных
+    в порядке убывания даты создания"""
+    model = Product
+    template_name = 'catalog/products_list.html'
+    context_object_name = 'products'
+    ordering = ['-created_at']
+
+
 class ProductDetailView(DetailView):
     """Выводит данные по одному продукту"""
     model = Product
@@ -62,13 +63,27 @@ class ProductDetailView(DetailView):
 class ProductCreateView(CreateView):
     """"""
     model = Product
-    fields = ["name", "description", "picture", "category", "purchase_price"]
+    form_class = ProductForm
     template_name = 'catalog/product_form.html'
     success_url = reverse_lazy('catalog:product_list')
 
     def form_valid(self, form: Any) -> HttpResponse:
         """Обрабатывает валидную форму создания продукта."""
         return super().form_valid(form)
+
+
+class ProductUpdateView(UpdateView):
+    model = Product
+    form_class = ProductForm
+    template_name = 'catalog/product_form.html'
+    success_url = reverse_lazy('catalog:product_list')
+
+
+class ProductDeleteView(DeleteView):
+    model = Product
+    template_name = 'catalog/product_confirm_delete.html'
+    success_url = reverse_lazy('catalog:product_list')
+
 
 # def home(request: HttpRequest) -> HttpResponse:
 #     """  Отображает главную страницу """
