@@ -1,6 +1,7 @@
 from typing import Any
 
 from django import forms
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DeleteView, DetailView, FormView, ListView, TemplateView, UpdateView
@@ -11,34 +12,34 @@ from catalog.models import Product
 
 
 class HomeView(TemplateView):
-    """Отображает главную страницу """
-    template_name = 'catalog/home.html'
+    """Отображает главную страницу"""
+
+    template_name = "catalog/home.html"
 
 
 class ContactsView(FormView):
-    """ Отображает страницу контактов и форму обратной связи """
-    template_name = 'catalog/contacts.html'
+    """Отображает страницу контактов и форму обратной связи"""
+
+    template_name = "catalog/contacts.html"
     form_class = ContactForm
 
     def form_valid(self, form: forms.Form) -> HttpResponse:
         """Обрабатывает валидную форму и возвращает HTTP-ответ с результатом.
         Эта функция вызывается когда данные формы прошли валидацию."""
-        name = form.cleaned_data['name']
-        message = form.cleaned_data['message']
-        response_content = (
-            f"Спасибо, {name}! Сообщение получено.<br>"
-            f"Ваше сообщение: '{message}'"
-        )
+        name = form.cleaned_data["name"]
+        message = form.cleaned_data["message"]
+        response_content = f"Спасибо, {name}! Сообщение получено.<br>" f"Ваше сообщение: '{message}'"
         return HttpResponse(response_content)
 
 
 class ProductListView(ListView):
-    """  Отображает главную страницу с данными по всем продуктам """
+    """Отображает главную страницу с данными по всем продуктам"""
+
     model = Product
 
     def get_queryset(self) -> Any:
         """Выводим последние созданные 5 продуктов в консоль"""
-        products = Product.objects.order_by('-created_at')[:5]
+        products = Product.objects.order_by("-created_at")[:5]
 
         print("=== ПОСЛЕДНИЕ 5 ПРОДУКТОВ ===")
         for product in products:
@@ -49,40 +50,47 @@ class ProductListView(ListView):
 class ProductsListView(ListView):
     """Отображает все продукты в виде списка из базы данных
     в порядке убывания даты создания"""
+
     model = Product
-    template_name = 'catalog/products_list.html'
-    context_object_name = 'products'
-    ordering = ['-created_at']
+    template_name = "catalog/products_list.html"
+    context_object_name = "products"
+    ordering = ["-created_at"]
 
 
-class ProductDetailView(DetailView):
-    """Выводит данные по одному продукту"""
+class ProductDetailView(LoginRequiredMixin, DetailView):
+    """Отображение детальной информации о продукте."""
+
     model = Product
 
 
-class ProductCreateView(CreateView):
-    """"""
+class ProductCreateView(LoginRequiredMixin, CreateView):
+    """Контроллер для создания нового продукта."""
+
     model = Product
     form_class = ProductForm
-    template_name = 'catalog/product_form.html'
-    success_url = reverse_lazy('catalog:product_list')
+    template_name = "catalog/product_form.html"
+    success_url = reverse_lazy("catalog:product_list")
 
     def form_valid(self, form: Any) -> HttpResponse:
         """Обрабатывает валидную форму создания продукта."""
         return super().form_valid(form)
 
 
-class ProductUpdateView(UpdateView):
+class ProductUpdateView(LoginRequiredMixin, UpdateView):
+    """Контроллер для редактирования существующего продукта."""
+
     model = Product
     form_class = ProductForm
-    template_name = 'catalog/product_form.html'
-    success_url = reverse_lazy('catalog:product_list')
+    template_name = "catalog/product_form.html"
+    success_url = reverse_lazy("catalog:product_list")
 
 
-class ProductDeleteView(DeleteView):
+class ProductDeleteView(LoginRequiredMixin, DeleteView):
+    """Контроллер для удаления продукта."""
+
     model = Product
-    template_name = 'catalog/product_confirm_delete.html'
-    success_url = reverse_lazy('catalog:product_list')
+    template_name = "catalog/product_confirm_delete.html"
+    success_url = reverse_lazy("catalog:product_list")
 
 
 # def home(request: HttpRequest) -> HttpResponse:
