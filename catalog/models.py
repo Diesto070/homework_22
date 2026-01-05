@@ -3,7 +3,8 @@ from django.db.models import CharField
 
 
 class Category(models.Model):
-    """ Модель категории товаров. """
+    """Модель категории товаров."""
+
     name = models.CharField(
         max_length=100,
         verbose_name="Название категории",
@@ -18,16 +19,18 @@ class Category(models.Model):
 
     class Meta:
         """Метаданные модели категории."""
+
         verbose_name = "Категория"
         verbose_name_plural = "Категории"
 
     def __str__(self) -> CharField:
-        """ Строковое представление категории. """
+        """Строковое представление категории."""
         return self.name
 
 
 class Product(models.Model):
-    """ Модель продукта/товара. """
+    """Модель продукта/товара."""
+
     name = models.CharField(
         max_length=100,
         verbose_name="Название продукта",
@@ -53,27 +56,28 @@ class Product(models.Model):
         blank=True,
         verbose_name="Категории",
         help_text="Выберите категорию",
-        related_name='products',
-    )          # категория
+        related_name="products",
+    )  # категория
     purchase_price = models.DecimalField(
         max_digits=10,
         decimal_places=2,
         default=0.00,
         # validators=[MinValueValidator(0)],  # Цена не может быть отрицательной
-        verbose_name='Цена продукта',
-        help_text='Стоимость продукта',
-    )       # цена за покупку
+        verbose_name="Цена продукта",
+        help_text="Стоимость продукта",
+    )  # цена за покупку
     created_at = models.DateTimeField(
-        auto_now_add=True,     # автоматически при создании
-        verbose_name='Дата и время создания',
+        auto_now_add=True,  # автоматически при создании
+        verbose_name="Дата и время создания",
     )
     updated_at = models.DateTimeField(
-        auto_now=True,    # автоматически обновляется при каждом сохранении
-        verbose_name='Дата последнего изменения',
+        auto_now=True,  # автоматически обновляется при каждом сохранении
+        verbose_name="Дата последнего изменения",
     )
 
     class Meta:
         """Метаданные модели продукта."""
+
         verbose_name = "Продукт"
         verbose_name_plural = "Продукты"
         ordering = ["category", "name"]
