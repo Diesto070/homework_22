@@ -1,6 +1,8 @@
 from django.db import models
 from django.db.models import CharField
 
+from users.models import User
+
 
 class Category(models.Model):
     """Модель категории товаров."""
@@ -74,6 +76,18 @@ class Product(models.Model):
         auto_now=True,  # автоматически обновляется при каждом сохранении
         verbose_name="Дата последнего изменения",
     )
+    is_published = models.BooleanField(
+        default=False,
+        verbose_name="Опубликовать продукт",
+        help_text="Отметьте, чтобы опубликовать продукт",
+    )
+    owner = models.ForeignKey(
+        User,
+        verbose_name="Владелец",
+        help_text="Владелец продукта",
+        blank=True, null=True,
+        on_delete=models.SET_NULL
+    )
 
     class Meta:
         """Метаданные модели продукта."""
@@ -81,6 +95,9 @@ class Product(models.Model):
         verbose_name = "Продукт"
         verbose_name_plural = "Продукты"
         ordering = ["category", "name"]
+        permissions = [
+            ("can_unpublish_product", "Can unpublish product")    # может отменять публикацию продукта
+        ]
 
     def __str__(self) -> str:
         """Строковое представление продукта."""

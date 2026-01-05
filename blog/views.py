@@ -1,8 +1,9 @@
 from typing import Any, Optional
 
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.core.exceptions import PermissionDenied
 from django.db.models import QuerySet
-from django.http import HttpResponse
+from django.http import HttpRequest, HttpResponse
 from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
@@ -30,12 +31,12 @@ class BlogDetailView(LoginRequiredMixin, DetailView):
     model = Blog
     template_name = "blog/blog_detail.html"
 
-    def get_object(self, queryset: Optional[QuerySet[Blog]] = None) -> Blog:
+    def get_object(self, queryset: Optional[QuerySet] = None) -> Blog:
         """Получает объект статьи и увеличивает счетчик просмотров."""
-        self.object = super().get_object(queryset)
-        self.object.views_count += 1
-        self.object.save()
-        return self.object
+        blog = super().get_object(queryset)
+        blog.views_count += 1
+        blog.save()
+        return blog
 
 
 class BlogCreateView(LoginRequiredMixin, CreateView):
@@ -46,6 +47,12 @@ class BlogCreateView(LoginRequiredMixin, CreateView):
     fields = ["heading", "content", "picture", "is_publication"]
     template_name = "blog/blog_form.html"
     success_url = reverse_lazy("blog:blog_list")
+
+    def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        """Проверяем права при загрузке страницы создания"""
+        if not request.user.has_perm('blog.add_blog'):
+            raise PermissionDenied("Нет прав для редактирования статей")
+        return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form: Any) -> HttpResponse:
         """Обрабатывает валидную форму создания статьи."""
@@ -62,16 +69,23 @@ class BlogUpdateView(LoginRequiredMixin, UpdateView):
     template_name = "blog/blog_form.html"
     success_url = reverse_lazy("blog:blog_list")
 
+    def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        """Проверяем права при загрузке страницы редактирования"""
+        if not request.user.has_perm('blog.add_blog'):
+            raise PermissionDenied("Нет прав для редактирования статей")
+        return super().dispatch(request, *args, **kwargs)
+
     def get_success_url(self) -> Any:
         """Возвращает URL для перенаправления после успешного обновления.
         Перенаправляет на страницу самой статьи, а не на список."""
         return reverse("blog:blog_detail", kwargs={"pk": self.object.pk})
 
 
-class BlogDeleteView(LoginRequiredMixin, DeleteView):
+class BlogDeleteView(PermissionRequiredMixin, LoginRequiredMixin, DeleteView):
     """Предоставляет подтверждение удаления и перенаправляет
     на список статей после успешного удаления."""
 
     model = Blog
     template_name = "blog/blog_confirm_delete.html"
     success_url = reverse_lazy("blog:blog_list")
+    permission_required = "blog.delete_blog"

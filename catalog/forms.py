@@ -1,6 +1,7 @@
 from typing import Any
 
 from django.core.exceptions import ValidationError
+from django.core.files.uploadedfile import UploadedFile
 from django.forms import BooleanField, ModelForm
 
 from catalog.models import Product
@@ -13,6 +14,7 @@ class StyleFormMixin:
     """Миксин для автоматического добавления CSS - классов к полям формы.
     Автоматически назначает классы 'form-control' для обычных полей и 'form-check-input'
     для булевых полей(чекбоксов)."""
+    fields: dict
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
@@ -31,7 +33,8 @@ class ProductForm(StyleFormMixin, ModelForm):
         """Метаданные формы продукта."""
 
         model = Product
-        fields = "__all__"
+        exclude = ["owner"]
+        # fields = "__all__"
 
     def clean_name(self) -> Any:
         """Валидация названия продуктов.
@@ -64,10 +67,20 @@ class ProductForm(StyleFormMixin, ModelForm):
         """Валидация проверяет, загружаемое изображение на соответствие формату и размеру."""
         picture = self.cleaned_data.get("picture")
 
-        if picture:
+        if picture and isinstance(picture, UploadedFile):
             if picture.content_type not in ["image/jpeg", "image/jpg", "image/png"]:
                 raise ValidationError("Можно загружать только JPG и PNG файлы")
 
             if picture.size > 5 * 1024 * 1024:
                 raise ValidationError("Размер изображения не должен превышать 5 МБ.")
         return picture
+
+
+class ProductModeratorForm(StyleFormMixin, ModelForm):
+    """ предназначена для ограниченного управления продуктами,
+    в основном для модерации публикации
+    Форма только для управления публикацией"""
+    class Meta:
+        """Метаданные формы продукта."""
+        model = Product
+        fields = ("is_published", "name", "description")  # только основные поля

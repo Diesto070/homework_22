@@ -39,7 +39,9 @@ Auto
                 <p class="lead text-body-secondary">"Покупки"</p>
                 <p>
                     <a href="{% url 'blog:blog_list' %}" class="btn btn-primary my-2">Перейти к блогу</a>
+                    {% if perms.blog.add_blog %}
                     <a href="{% url 'blog:blog_form' %}" class="btn btn-secondary my-2">Создать статью для блога</a>
+                    {% endif %}
                     <a href="{% url 'catalog:product_list' %}" class="btn btn-secondary my-2">Перейти на страницу магазина</a>
                 </p>
             </div>
