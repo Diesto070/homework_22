@@ -15,4 +15,3 @@ class Migration(migrations.Migration):
             options={"ordering": ["id"], "verbose_name": "Запись блога", "verbose_name_plural": "Записи блога"},
         ),
     ]
-    

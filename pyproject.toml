@@ -11,7 +11,9 @@ dependencies = [
     "django (>=5.2.7,<6.0.0)",
     "psycopg2-binary (>=2.9.11,<3.0.0)",
     "pillow (>=12.0.0,<13.0.0)",
-    "python-dotenv (>=1.1.1,<2.0.0)"
+    "python-dotenv (>=1.1.1,<2.0.0)",
+    "redis (>=7.1.0,<8.0.0)",
+    "ipython (>=9.9.0,<10.0.0)"
 ]
 
 
