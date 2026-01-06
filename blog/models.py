@@ -22,23 +22,25 @@ class Blog(models.Model):
     )
     created_at = models.DateTimeField(
         auto_now_add=True,  # автоматически при создании
-        verbose_name='Дата и время создания',
+        verbose_name="Дата и время создания",
     )
     is_publication = models.BooleanField(
-        default=False,    # признак публикации
+        default=False,  # признак публикации
         verbose_name="Опубликовано",
     )
     views_count = models.PositiveIntegerField(
-        verbose_name="Количество просмотров",
-        help_text="Автоматически увеличивается при просмотре",
-        default=0
+        verbose_name="Количество просмотров", help_text="Автоматически увеличивается при просмотре", default=0
     )
 
     class Meta:
         """Метаданные модели блога"""
+
         verbose_name = "Запись блога"
         verbose_name_plural = "Записи блога"
-        ordering = ['id']
+        ordering = ["id"]
+        permissions = [
+            ("can_manage_blog", "Can manage blog"),   # право управления блогом
+        ]
 
     def __str__(self) -> CharField:
         """Возвращает заголовок блога."""
