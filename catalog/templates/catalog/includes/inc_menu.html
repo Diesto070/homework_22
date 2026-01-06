@@ -9,6 +9,23 @@
                     <h4>Навигация</h4>
                     <ul class="list-unstyled">
                         <li><a href="{% url 'catalog:product_list' %}" class="text-white">Главная</a></li>
+                    <!-- БЛОК КАТЕГОРИЙ -->
+                    <li class="dropdown">
+                        <a href="#" class="text-white dropdown-toggle" role="button" data-bs-toggle="dropdown">
+                            Категории
+                        </a>
+                        <ul class="dropdown-menu">
+                            {% for category in categories %}
+                                <a class="dropdown-item" href="{% url 'catalog:category_products' category.id %}">
+                                    {{ category.name }}
+                                </a>
+                            {% empty %}
+                                <a class="dropdown-item text-muted" href="#">Категорий пока нет</a>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                    <!-- КОНЕЦ БЛОКА КАТЕГОРИЙ -->
+
                         {% if user.is_authenticated %}
                         <li>
                             <form method="post" action="{% url 'users:logout' %}" style="display: inline;">

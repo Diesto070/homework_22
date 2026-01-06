@@ -3,25 +3,30 @@ from typing import Any
 from django import forms
 from django.contrib.auth.decorators import permission_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.cache import cache
 from django.core.exceptions import PermissionDenied
 from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from django.views.generic import CreateView, DeleteView, DetailView, FormView, ListView, TemplateView, UpdateView
 
 from catalog.forms import ProductForm, ProductModeratorForm
 from catalog.forms_contact import ContactForm
-from catalog.models import Product
+from catalog.mixins import CategoryMixin
+from catalog.models import Category, Product
+from catalog.services import ProductService
 
 
-class HomeView(TemplateView):
+class HomeView(CategoryMixin, TemplateView):
     """Отображает главную страницу"""
 
     template_name = "catalog/home.html"
 
 
-class ContactsView(FormView):
+class ContactsView(CategoryMixin, FormView):
     """Отображает страницу контактов и форму обратной связи"""
 
     template_name = "catalog/contacts.html"
@@ -36,34 +41,44 @@ class ContactsView(FormView):
         return HttpResponse(response_content)
 
 
-class ProductListView(ListView):
+class ProductListView(CategoryMixin, ListView):
     """Отображает главную страницу с данными по всем продуктам"""
 
     model = Product
 
-    def get_queryset(self) -> Any:
-        """Возвращает queryset в зависимости от прав пользователя.
+    def get_queryset(self) -> QuerySet:
+        """Возвращает queryset в зависимости от прав пользователя с кэшированием.
         Выводим последние созданные 5 продуктов в консоль"""
-        products = Product.objects.order_by("-created_at")[:5]
 
+        # Вывод последних 5 продуктов (без кэширования)
+        products = Product.objects.order_by("-created_at")[:5]
         print("=== ПОСЛЕДНИЕ 5 ПРОДУКТОВ ===")
         for product in products:
             print(f"{product.id} - {product.name} ({product.created_at.strftime('%d.%m.%Y %H:%M')})")
 
+        # Пытаемся получить все продукты из кэша
+        cache_key = "product_list:all"
+        all_products = cache.get(cache_key)
+
+        if all_products is None:
+            print("Кэш пустой, загружаем все продукты из базы")
+            all_products = Product.objects.all()
+            cache.set(cache_key, all_products, 60 * 15)
+
         user = self.request.user
+        # Фильтруем кэшированные данные по правам
         # Модераторы видят все продукты
         if user.has_perm('catalog.can_unpublish_product'):
-            return Product.objects.all()
-
+            return all_products
         # Авторизованный пользователь видит все продукты
-        if user.is_authenticated:
-            return Product.objects.all()
+        elif user.is_authenticated:
+            return all_products
+        else:
+            #    Неавторизованный - только опубликованные
+            return all_products.filter(is_published=True)
 
-        # Неавторизованный - только опубликованные
-        return Product.objects.filter(is_published=True)
 
-
-class ProductsListView(ListView):
+class ProductsListView(CategoryMixin, ListView):
     """Отображает все продукты в виде списка из базы данных
     в порядке убывания даты создания"""
 
@@ -73,13 +88,14 @@ class ProductsListView(ListView):
     ordering = ["-created_at"]
 
 
-class ProductDetailView(LoginRequiredMixin, DetailView):
+@method_decorator(cache_page(60 * 5), name='dispatch')
+class ProductDetailView(CategoryMixin, LoginRequiredMixin, DetailView):
     """Отображение детальной информации о продукте."""
 
     model = Product
 
 
-class ProductCreateView(LoginRequiredMixin, CreateView):
+class ProductCreateView(CategoryMixin, LoginRequiredMixin, CreateView):
     """Контроллер для создания нового продукта."""
 
     model = Product
@@ -94,7 +110,7 @@ class ProductCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class ProductUpdateView(LoginRequiredMixin, UpdateView):
+class ProductUpdateView(CategoryMixin, LoginRequiredMixin, UpdateView):
     """Контроллер для редактирования существующего продукта."""
 
     model = Product
@@ -126,7 +142,7 @@ class ProductUpdateView(LoginRequiredMixin, UpdateView):
         raise PermissionDenied
 
 
-class ProductDeleteView(LoginRequiredMixin, DeleteView):
+class ProductDeleteView(CategoryMixin, LoginRequiredMixin, DeleteView):
     """Контроллер для удаления продукта."""
 
     model = Product
@@ -156,6 +172,28 @@ def unpublish_product(request: HttpRequest, pk: int) -> HttpResponseRedirect:
         product.is_published = False
         product.save()
     return redirect('catalog:product_list')
+
+
+class CategoryProductsView(CategoryMixin, ListView):
+    """Отображает список продуктов в выбранной категории"""
+    model = Product
+    template_name = "catalog/category_products.html"
+    context_object_name = "products"
+
+    def get_queryset(self) -> QuerySet:
+        """Возвращает queryset продуктов для указанной категории.
+        Использует сервисный слой для получения продуктов с применением низкоуровневого кэширования."""
+        category_id = self.kwargs["category_id"]
+        return ProductService.get_list_products_by_category(category_id)
+
+    def get_context_data(self, **kwargs: Any) -> dict:
+        """Расширяет контекст шаблона данными категории и списком всех категорий."""
+        context = super().get_context_data(**kwargs)
+        category_id = self.kwargs["category_id"]
+        category = get_object_or_404(Category, id=category_id)
+        context["category"] = category
+        context['categories'] = Category.objects.all()
+        return context
 
 # def unpublish_product(request, pk):
 #     """Отменяет публикацию продукта"""

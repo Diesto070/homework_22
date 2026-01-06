@@ -1,0 +1,18 @@
+{% extends 'catalog/base.html' %}
+{% load my_tags %}
+{% block content %}
+
+<div class="container">
+    <h1>Продукты в категории: "{{ category.name }}"</h1>
+
+    {% for product in products %}
+        <div>
+            <h3>Название: {{ product.name }}</h3>
+            <p>Цена: {{ product.purchase_price }} ₽</p>
+            <p>Описание: {{ product.description }}</p>
+        </div>
+    {% empty %}
+        <p>В этой категории нет продуктов.</p>
+    {% endfor %}
+    {% endblock %}
+</div>
